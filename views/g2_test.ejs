@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('layouts/header'); -%>
+</head>
+
+<body>
+    <!-- Navigation-->
+    <%- include('layouts/navbar'); -%>
+        <!-- Page Header-->
+        <header class="masthead" style="background-image: url('/assets/img/g2-bg.jpg')">
+            <div class="container position-relative px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <div class="page-heading">
+                            <h1>G2_Test</h1>
+                            <span class="subheading">Book your G2_Test here.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Main Content-->
+        <main class="mb-4">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <!-- <div class="col-md-10 col-lg-8 col-xl-7"> -->
+                    <div id="information">
+                        <section id="Personal_info">
+                            <h1>Personal Information</h1>
+                            <!-- data-sb-form-api-token="API_TOKEN" -->
+                            <form id="contactForm" action="/g2_test/submit" method="post">
+                                <div class="form-floating">
+                                    <input class="form-control" id="fname" name="fname"
+                                        value="<%= userdata.firstname %>" type="text"
+                                        placeholder="Enter your first name..." <%=!idDefault? "readonly" : "" %> />
+                                    <label for="fname">First Name</label>
+                                </div>
+                                <div class="form-floating">
+                                    <input class="form-control" id="lname" name="lname" value="<%= userdata.lastname %>"
+                                        type="text" required placeholder="Enter your last name..."
+                                        <%=!idDefault? "readonly" : "" %> />
+                                    <label for="lname">Last Name</label>
+                                </div>
+                                <!-- display the option to enter liscense number only if user is first time logging in  -->
+                                <% if(userdata.License_No==="default" ){ %>
+                                    <div class="form-floating">
+                                        <input class="form-control" id="liscense_no" name="liscense_no" type="text"
+                                            pattern="[A-Za-z0-9]{8}" required placeholder="Enter your Liscense No..." />
+                                        <label for="liscense_no">Liscense No. <small style="font-size: small;">Must be 8
+                                                characters and alphanumeric</small> </label>
+                                    </div>
+                                    <% } %>
+                                        <div class="form-floating">
+                                            <input class="form-control" id="age" value="<%= userdata.Age %>" name="age"
+                                                type="number" min="18" max="120" required
+                                                placeholder="Enter your age..." <%=!idDefault? "readonly" : "" %> />
+                                            <label for="age">Age</label>
+                                        </div>
+
+                                        <div class="form-floating">
+                                            <input class="form-control" id="car_name" value="<%= userdata.firstname %>"
+                                                name="car_name" type="text" required placeholder="Enter Car Name..."
+                                                <%=!idDefault? "readonly" : "" %> />
+                                            <label for="car_name">Car Name</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input class="form-control" id="make"
+                                                value="<%= userdata.car_details.make %>" name="make" type="text"
+                                                required placeholder="Enter your make..." <%=!idDefault? "readonly" : ""
+                                                %> />
+                                            <label for="make">Make</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input class="form-control" id="model"
+                                                value="<%= userdata.car_details.model %>" name="model" type="text"
+                                                placeholder="Enter car model..." <%=!idDefault? "readonly" : "" %> />
+                                            <label for="model">Model</label>
+
+                                        </div>
+                                        <div class="form-floating">
+                                            <input class="form-control" id="year"
+                                                value="<%= userdata.car_details.year %>" name="year" type="number"
+                                                min="1950" max="2024" required placeholder="Enter your age..."
+                                                <%=!idDefault? "readonly" : "" %> />
+                                            <label for="year">Year</label>
+                                        </div>
+                                        <div class="form-floating">
+                                            <input class="form-control" id="plat_num"
+                                                value="<%= userdata.car_details.platno %>" name="plat_num" type="text"
+                                                placeholder="Enter your dob..." <%=!idDefault? "readonly" : "" %> />
+                                            <label for="plat_num">Plate Number</label>
+                                        </div>
+
+                                        <% if(idDefault) {%>
+                                            <div class="form-floating">
+                                                <input class="form-control mt-3 mb-3" id="date" name="date" min=<%=new
+                                                    Date().toISOString().split(`T`)[0] %> type="date" placeholder="Enter
+                                                date..." onchange required />
+                                            </div>
+                                            <div class="form-floating">
+                                                <select id="AppointmentTime" name="AppointmentTime">
+
+                                                </select>
+                                            </div>
+                                            <% } %>
+
+                                                <button class="btn btn-primary text-uppercase text-center"
+                                                    id="submitButton" type="submit" <%=!idDefault? "disabled" : ""
+                                                    %>>Submit</button>
+                            </form>
+                        </section>
+                    </div>
+                    <!-- </div> -->
+                </div>
+            </div>
+        </main>
+        <!-- Footer-->
+        <%- include('layouts/footer'); -%>
+            <!-- Bootstrap core JS-->
+            <%- include('layouts/scripts'); -%>
+
+                <script>
+                    document.getElementById("date")
+                        .addEventListener("change", async function () {
+                            const selectedDate = this.value;
+                            console.log(selectedDate);
+                            const timeSelect = document.getElementById("AppointmentTime");
+                            try {
+                                const response = await fetch(`/g2_test/${selectedDate}`);
+                                const data = await response.json();
+                                data.timeSlots.forEach((slot) => {
+                                    const option = document.createElement("option");
+                                    option.value = slot;
+                                    option.textContent = slot;
+                                    timeSelect.appendChild(option);
+                                });
+                            } catch (error) {
+                                console.error("Error fetching time slots:", error);
+                                timeSelect.innerHTML =
+                                    "<option selected disabled>Error fetching time slots</option>";
+                            }
+                        });
+
+                </script>
+</body>
+
+</html>
